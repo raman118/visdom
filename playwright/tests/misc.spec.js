@@ -25,4 +25,31 @@ test.describe('Misc Tests', () => {
     await expect(chart.locator('svg text')).toHaveCount(12);
     await expect(chart.locator('svg g')).toHaveCount(6);
   });
+
+  test('LaTeX legend labels fit inside the legend', async ({ page }) => {
+    await runDemo(page, 'misc_plot_latex_update');
+
+    const legend = page.locator('.plotly-graph-div .legend');
+    await expect
+      .poll(() =>
+        legend.evaluate((element) => {
+          const background = element.querySelector('rect.bg');
+          const groups = element.querySelectorAll('svg.legendtext-math > g');
+          if (!background || groups.length !== 2) return Infinity;
+
+          // Firefox can report a clipped client rectangle for the SVG group.
+          const glyphRightEdges = Array.from(groups, (group) => {
+            const { x, y, width } = group.getBBox();
+            return new DOMPoint(x + width, y).matrixTransform(
+              group.getScreenCTM()
+            ).x;
+          });
+          return (
+            Math.max(...glyphRightEdges) -
+            background.getBoundingClientRect().right
+          );
+        })
+      )
+      .toBeLessThanOrEqual(1);
+  });
 });

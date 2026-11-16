@@ -1,0 +1,8 @@
+/* SPDX-License-Identifier: Apache-2.0
+ * https://www.apache.org/licenses/LICENSE-2.0
+ */
+
+/* Firefox undermeasures clipped MathJax SVGs in Plotly's off-screen tester. */
+#js-plotly-tester svg[class^='legend'][class$='text-math'] {
+  overflow: visible !important;
+}
